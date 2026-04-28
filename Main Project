@@ -1,0 +1,543 @@
+import React, { Component } from 'react';
+import { AppRegistry, Text, View, StyleSheet, Image, TextInput, ImageBackground, TouchableHighlight, Alert, Dimensions, ScrollView } from 'react-native';
+import Constants from 'expo-constants';
+
+let deviceHeight = Dimensions.get('window').height;
+let deviceWidth = Dimensions.get('window').width;
+
+export default class App extends Component {
+    
+    state = {
+        firstPageDisplay: 'block',
+        secondPageDisplay: 'none',
+        thirdPageDisplay: 'none',
+        customAmount: '',
+        currentWater: 0,
+        dailyGoal: 100,
+        streakDays: 0,
+    }
+    
+    handleFirstPagePress = () => this.setState(state => ({
+        firstPageDisplay: 'block',
+        secondPageDisplay: 'none',
+        thirdPageDisplay: 'none',
+    }));
+
+    handleSecondPagePress = () => this.setState(state => ({
+        firstPageDisplay: 'none',
+        secondPageDisplay: 'block',
+        thirdPageDisplay: 'none',
+    }));
+
+    handleThirdPagePress = () => this.setState(state => ({
+        firstPageDisplay: 'none',
+        secondPageDisplay: 'none',
+        thirdPageDisplay: 'block',
+    }));
+    
+    addWater = (amount) => {
+        this.setState({
+            currentWater: this.state.currentWater + amount,
+        })
+    }
+    
+    logCustomWater = () => {
+        if (this.state.customAmount == '' || isNaN(this.state.customAmount)) {
+            Alert.alert('Please enter a number');
+        } else {
+            this.setState({
+                currentWater: this.state.currentWater + Number(this.state.customAmount),
+                customAmount: '',
+            })
+        }
+    }
+    
+    lowerGoal = () => {
+        if (this.state.dailyGoal > 8) {
+            this.setState({
+                dailyGoal: this.state.dailyGoal - 8,
+            })
+        }
+    }
+    
+    raiseGoal = () => {
+        this.setState({
+            dailyGoal: this.state.dailyGoal + 8,
+        })
+    }
+    
+    saveGoal = () => {
+        Alert.alert('Goal saved!');
+    }
+    
+    goToNextDay = () => {
+        if (this.state.currentWater >= this.state.dailyGoal) {
+            this.setState({
+                streakDays: this.state.streakDays + 1,
+                currentWater: 0,
+                customAmount: '',
+            })
+        } else {
+            this.setState({
+                streakDays: 0,
+                currentWater: 0,
+                customAmount: '',
+            })
+        }
+    }
+    
+    render() {
+        let progressWidth = (this.state.currentWater / this.state.dailyGoal) * (3*(deviceWidth/5));
+        
+        if (progressWidth > 3*(deviceWidth/5)) {
+            progressWidth = 3*(deviceWidth/5);
+        }
+        
+        return (
+            <View style={styles.container}>
+                
+                
+                
+                <View style={{ display: this.state.firstPageDisplay }}>
+                    <View style={styles.homeContainer}>
+                    
+                        <View style={styles.progressCard}>
+                            <Text style={styles.progressTitle}>
+                                Todays Progress
+                            </Text>
+                            <Text style={styles.progressText}>
+                                {this.state.currentWater} oz / {this.state.dailyGoal} oz
+                            </Text>
+                            <View style={styles.progressBarBackground}>
+                                <View style={[styles.progressBarFill, { width: progressWidth }]}>
+                                </View>
+                            </View>
+                        </View>
+                        
+                        <View style={styles.quickAddSection}>
+                            <View style={styles.quickAddRow}>
+                                <TouchableHighlight
+                                    onPress={() => this.addWater(8)}
+                                >
+                                    <View style={styles.smallButton}>
+                                        <Text style={styles.smallButtonText}>
+                                            +8 oz
+                                        </Text>
+                                    </View>
+                                </TouchableHighlight>
+                                <TouchableHighlight
+                                    onPress={() => this.addWater(16)}
+                                >
+                                    <View style={styles.smallButton}>
+                                        <Text style={styles.smallButtonText}>
+                                            +16 oz
+                                        </Text>
+                                    </View>
+                                </TouchableHighlight>
+                            </View>
+                            
+                            <View style={styles.quickAddRow}>
+                                <TouchableHighlight
+                                    onPress={() => this.addWater(24)}
+                                >
+                                    <View style={styles.smallButton}>
+                                        <Text style={styles.smallButtonText}>
+                                            +24 oz
+                                        </Text>
+                                    </View>
+                                </TouchableHighlight>
+                                <TouchableHighlight
+                                    onPress={() => this.addWater(32)}
+                                >
+                                    <View style={styles.smallButton}>
+                                        <Text style={styles.smallButtonText}>
+                                            +32 oz
+                                        </Text>
+                                    </View>
+                                </TouchableHighlight>
+                            </View>
+                        </View>
+                        
+                        <TextInput style={styles.textBox}
+                            onChangeText={(customAmount) => this.setState({customAmount})}
+                            value={this.state.customAmount}
+                            placeholder='Custom'
+                        />
+                        
+                        <TouchableHighlight
+                            onPress={this.logCustomWater}
+                        >
+                            <View style={styles.bigButton}>
+                                <Text style={styles.bigButtonText}>
+                                    Log Custom Water
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+                
+                <View style={{ display: this.state.secondPageDisplay }}>
+                    <View style={styles.streakContainer}>
+                        <Text style={styles.sectionTitle}>
+                            Your Streak
+                        </Text>
+                        
+                        <Text style={styles.bigStreakText}>
+                            {this.state.streakDays}
+                        </Text>
+                        <Text style={styles.streakText}>
+                            days in a row
+                        </Text>
+                        <Text style={styles.streakMessage}>
+                            Keep it up!
+                        </Text>
+                        
+                        <View style={styles.weekRow}>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 1 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 2 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 3 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 4 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 5 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 6 ? '💧' : '⚪'}
+                            </Text>
+                            <Text style={styles.weekDrop}>
+                                {this.state.streakDays >= 7 ? '💧' : '⚪'}
+                            </Text>
+                        </View>
+                        
+                        <TouchableHighlight
+                            onPress={this.goToNextDay}
+                        >
+                            <View style={styles.bigButton}>
+                                <Text style={styles.bigButtonText}>
+                                    Next Day
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+                
+                
+                
+                <View style={{ display: this.state.thirdPageDisplay }}>
+                    <View style={styles.goalContainer}>
+                        <Text style={styles.sectionTitle}>
+                            Daily Goal
+                        </Text>
+                        
+                        <Text style={styles.goalAmount}>
+                            {this.state.dailyGoal} oz
+                        </Text>
+                        
+                        <View style={styles.goalButtonRow}>
+                            <TouchableHighlight
+                                onPress={this.lowerGoal}
+                            >
+                                <View style={styles.goalChangeButton}>
+                                    <Text style={styles.goalChangeText}>
+                                        -
+                                    </Text>
+                                </View>
+                            </TouchableHighlight>
+                            
+                            <TouchableHighlight
+                                onPress={this.raiseGoal}
+                            >
+                                <View style={styles.goalChangeButton}>
+                                    <Text style={styles.goalChangeText}>
+                                        +
+                                    </Text>
+                                </View>
+                            </TouchableHighlight>
+                        </View>
+                        
+                        
+                    </View>
+                </View>
+                
+                
+                
+                <View style={styles.bottomBar}>
+                    <TouchableHighlight
+                        onPress={this.handleFirstPagePress}
+                    >
+                        <View style={this.state.firstPageDisplay == 'block' ? styles.activeNavButton : styles.navButton}>
+                            <Text style={this.state.firstPageDisplay == 'block' ? styles.activeNavText : styles.inactiveNavText}>
+                                Home
+                            </Text>
+                        </View>
+                    </TouchableHighlight>
+                    
+                    <TouchableHighlight
+                        onPress={this.handleSecondPagePress}
+                    >
+                        <View style={this.state.secondPageDisplay == 'block' ? styles.activeNavButton : styles.navButton}>
+                            <Text style={this.state.secondPageDisplay == 'block' ? styles.activeNavText : styles.inactiveNavText}>
+                                Streak
+                            </Text>
+                        </View>
+                    </TouchableHighlight>
+                    
+                    <TouchableHighlight
+                        onPress={this.handleThirdPagePress}
+                    >
+                        <View style={this.state.thirdPageDisplay == 'block' ? styles.activeNavButton : styles.navButton}>
+                            <Text style={this.state.thirdPageDisplay == 'block' ? styles.activeNavText : styles.inactiveNavText}>
+                                Goal
+                            </Text>
+                        </View>
+                    </TouchableHighlight>
+                </View>
+                
+                
+            </View>
+            
+            
+      )
+   }
+}
+
+const styles = StyleSheet.create ({
+    container: {
+       flex: 1,
+       backgroundColor: 'white',
+    },
+    bottomBar: {
+        height: deviceHeight/10,
+        width: deviceWidth,
+        justifyContent: 'center',
+        backgroundColor: 'darkblue',
+        borderTopWidth: 4,
+        borderTopColor: 'white',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    sectionTitle: {
+        fontSize: deviceHeight/24,
+        textAlign: 'center',
+        fontFamily: 'Futura',
+        color: 'darkblue',
+        marginTop: 10,
+        marginBottom: 0,
+    },
+    homeContainer: {
+        height: 9*(deviceHeight/10),
+        width: deviceWidth,
+        backgroundColor: 'aliceblue',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        paddingTop: 10,
+        paddingBottom: 10,
+    },
+    streakContainer: {
+        height: 9*(deviceHeight/10),
+        width: deviceWidth,
+        backgroundColor: 'aliceblue',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        paddingTop: 10,
+        paddingBottom: 10,
+    },
+    goalContainer: {
+        height: 9*(deviceHeight/10),
+        width: deviceWidth,
+        backgroundColor: 'aliceblue',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        paddingTop: 10,
+        paddingBottom: 10,
+    },
+    progressCard: {
+        width: 4*(deviceWidth/5),
+        height: deviceHeight/4.2,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 5,
+        borderWidth: 2,
+        borderColor: 'lightblue',
+    },
+    progressTitle: {
+        fontSize: 22,
+        color: 'darkblue',
+        textAlign: 'center',
+        marginBottom: 15,
+    },
+    progressText: {
+        fontSize: 24,
+        color: 'darkblue',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    progressBarBackground: {
+        height: 20,
+        width: 3*(deviceWidth/5),
+        backgroundColor: 'lightgray',
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: 20,
+        backgroundColor: 'deepskyblue',
+        borderRadius: 10,
+    },
+    quickAddSection: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    quickAddRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    smallButton: {
+        height: deviceHeight/16,
+        width: deviceWidth/3.5,
+        backgroundColor: 'deepskyblue',
+        borderColor: 'white',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 8,
+        borderRadius: 15,
+    },
+    smallButtonText: {
+        fontSize: deviceHeight/42,
+        fontFamily: 'Futura',
+        color: 'white',
+        textAlign: 'center',
+    },
+    bigButton: {
+        height: deviceHeight/14,
+        width: 3*(deviceWidth/4),
+        backgroundColor: 'deepskyblue',
+        borderColor: 'white',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 5,
+        borderRadius: 18,
+    },
+    bigButtonText: {
+        fontSize: deviceHeight/34,
+        fontFamily: 'Futura',
+        color: 'white',
+        textAlign: 'center',
+    },
+    textBox: {
+        height: deviceHeight/12,
+        width: 3*(deviceWidth/4),
+        borderWidth: 3,
+        borderColor: 'lightblue',
+        margin: 5,
+        backgroundColor: 'white',
+        borderRadius: 15,
+        textAlign: 'center',
+        color: 'darkblue',
+        fontSize: 20,
+    },
+    bigStreakText: {
+        fontSize: 90,
+        color: 'darkblue',
+        textAlign: 'center',
+        fontFamily: 'Futura',
+        marginTop: 0,
+    },
+    streakText: {
+        fontSize: 28,
+        color: 'darkblue',
+        textAlign: 'center',
+        marginBottom: 0,
+    },
+    streakMessage: {
+        fontSize: 22,
+        color: 'deepskyblue',
+        textAlign: 'center',
+        marginBottom: 0,
+    },
+    weekRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 0,
+    },
+    weekDrop: {
+        fontSize: 28,
+    },
+    goalAmount: {
+        fontSize: 55,
+        color: 'darkblue',
+        textAlign: 'center',
+        fontFamily: 'Futura',
+        marginBottom: 0,
+    },
+    goalButtonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 0,
+    },
+    goalChangeButton: {
+        height: 70,
+        width: 70,
+        backgroundColor: 'deepskyblue',
+        borderColor: 'white',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 20,
+        borderRadius: 20,
+    },
+    goalChangeText: {
+        fontSize: 40,
+        color: 'white',
+        textAlign: 'center',
+    },
+    activeNavButton: {
+        height: deviceHeight/14,
+        width: deviceWidth/4,
+        backgroundColor: 'deepskyblue',
+        borderColor: 'white',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 8,
+        borderRadius: 15,
+    },
+    navButton: {
+        height: deviceHeight/14,
+        width: deviceWidth/4,
+        backgroundColor: 'lightgray',
+        borderColor: 'white',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 8,
+        borderRadius: 15,
+    },
+    navButtonText: {
+        fontSize: deviceHeight/36,
+        textAlign: 'center',
+    },
+    activeNavText: {
+        fontSize: deviceHeight/52,
+        fontFamily: 'Futura',
+        color: 'white',
+        textAlign: 'center',
+    },
+    inactiveNavText: {
+        fontSize: deviceHeight/52,
+        fontFamily: 'Futura',
+        color: 'darkblue',
+        textAlign: 'center',
+    },
+});
